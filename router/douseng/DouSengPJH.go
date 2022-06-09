@@ -21,6 +21,11 @@ func (u *DouSengPJHRouter) DouSengPRouter(Router *gin.RouterGroup) {
 		douSengPJHRouter2.POST("login/",douSengPJHApi.DouSengLogin)//登陆接口
 		douSengPJHRouter2.GET("/",douSengPJHApi.GetUserInfo)//获取用户信息接口
 		douSengPJHRouter2.POST("register/",douSengPJHApi.DouSengRegister)//注册接口
+
+	}
+	douSengPJHRouter3 := Router.Group("publish")
+	{
+		douSengPJHRouter3.POST("action/",douSengPJHApi.DouSengPublishVideo)//上传视频接口
 	}
 
 }

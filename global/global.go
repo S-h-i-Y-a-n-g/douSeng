@@ -20,4 +20,5 @@ var (
 	GSD_LOG                 *zap.Logger
 	GSD_Casbin              *casbin.SyncedEnforcer
 	GSD_Concurrency_Control = &singleflight.Group{}
+	GSD_UP_Token              string
 )
