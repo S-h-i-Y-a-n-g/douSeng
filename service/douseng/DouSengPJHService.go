@@ -43,3 +43,10 @@ func (d *DouSengPJHService) DouSengLoginService(password,name string)(error,*ds.
 	err,user:=vi.DouSengLogin(password,name)
 	return err,user
 }
+
+//注册service
+func (d *DouSengPJHService) DouSengRegisterService(name,password string)error{
+	//一个中转作用，有问题就往上抛
+	err:=vi.DouSengRegister(password,name)
+	return err
+}

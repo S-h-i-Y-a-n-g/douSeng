@@ -18,3 +18,9 @@ type GetUserInfoBo struct {
 	UserId int64 `json:"user_id" form:"user_id"`
 	Token string `json:"token" form:"token"`
 }
+
+//用户注册入参
+type UserRegister struct {
+	Username      string `form:"username"` //用户名
+	Password      string `form:"password"`	//密码
+}

@@ -1,6 +1,7 @@
 package douseng
 
 import (
+	"errors"
 	"go.uber.org/zap"
 	"project/global"
 	res "project/model/douseng/response"
@@ -28,7 +29,6 @@ type UserInfo struct {
 	Password      string `json:"password"`
 	FollowCount   int64  `json:"follow_count,omitempty"`
 	FollowerCount int64  `json:"follower_count,omitempty"`
-	HeaderImg string 	`json:"header_img"`
 }
 
 const VideosTableName = "ds_video"
@@ -41,6 +41,12 @@ func (v *Videos) VideosTableName() string {
 func (v *Videos) UserTableName() string {
 	return UserTableName
 }
+
+
+var (
+	ErrorUserExist = errors.New("用户已存在")
+	ErrorUserLogin = errors.New("登陆失败，账号或密码错误")
+)
 
 
 
@@ -89,12 +95,33 @@ func (v *Videos)SelectIsFollow(userId int64,followId int64) (is bool , err error
 	}
 }
 
+//登录验证
 func (v *Videos) DouSengLogin(password,name string)(err error,info *UserInfo)  {
 	user:=new(UserInfo)
 	Password := utils.MD5V([]byte(password))
 	err=global.GSD_DB.Table(v.UserTableName()).Where("name = ? and password = ?",name,Password).Find(&user).Error
 	if user.Password != "" {
 		user.Password=password
+	}else {//为空则登录失败
+	return ErrorUserLogin,nil
 	}
 	return err,user
 }
+
+//注册验证
+func (v *Videos) DouSengRegister(password,name string)(err error)  {
+	user:=new(UserInfo)
+	Password := utils.MD5V([]byte(password))
+	err=global.GSD_DB.Table(v.UserTableName()).Where("name = ? AND deleted_at = ?",name,0).Find(&user).Error
+	if user.Password != "" {
+		//已有账号
+		return ErrorUserExist
+	}
+	//没有账号的话去注册
+	user.Name=name
+	user.Password=Password
+
+	err = global.GSD_DB.Table(v.UserTableName()).Create(&user).Error
+	return err
+}
+

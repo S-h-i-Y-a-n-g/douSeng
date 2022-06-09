@@ -25,4 +25,7 @@ var (
 	AddFlow                = Rules{"AppId": {NotEmpty()}, "Flow": {NotEmpty()}}
 	StartApp               = Rules{"AppId": {NotEmpty()}}
 	AuthorityApp           = Rules{"AppId": {NotEmpty()}, "Depts": {NotEmpty()}, "Authoritys": {NotEmpty()}, "Users": {NotEmpty()}}
+
+	DouSengLoginVerify     = Rules{"Username": {NotEmpty()},"Password": {NotEmpty()}}
+	DouSengRegisterVerify  = Rules{"Username": {NotEmpty()},"Password": {NotEmpty()}}
 )

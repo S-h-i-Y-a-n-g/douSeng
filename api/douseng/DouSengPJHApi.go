@@ -14,7 +14,6 @@ import (
 	res "project/model/douseng/response"
 	"project/model/system"
 	systemReq "project/model/system/request"
-	systemRes "project/model/system/response"
 	"project/utils"
 	"time"
 )
@@ -78,18 +77,14 @@ func (d *DouSengPJHApi) Feed(c *gin.Context) {
 func (d *DouSengPJHApi) DouSengLogin(c *gin.Context) {
 	var l req.DouSengLogin
 	_ = c.ShouldBind(&l)
-	if err := utils.Verify(l, utils.LoginVerify); err != nil {
+	if err := utils.Verify(l, utils.DouSengLoginVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	//if !store.Verify(l.CaptchaId, l.Captcha, true) {
-	//	response.FailWithMessage("验证码错误", c)
-	//	return
-	//}
 	if err, user := douSengPJHService.DouSengLoginService(l.Password,l.Username); err != nil {
 		global.GSD_LOG.Error("登陆失败! 用户名不存在或者密码错误!", zap.Any("err", err), utils.GetRequestID(c))
-		c.JSON(http.StatusNotFound, res.DSResponse{
-			StatusCode: 404,
+		c.JSON(http.StatusOK, res.DSResponse{
+			StatusCode: 1,
 			StatusMsg: "用户名不存在或者密码错误",
 		})
 	} else {//签发token
@@ -267,41 +262,38 @@ func (d *DouSengPJHApi) GetUserInfo(c *gin.Context) {
 //@Tags DouSeng
 //@Summary DouSeng用户注册账号
 //@Produce  application/json
-//@Param data body systemReq.Register true "用户名, 密码, 角色ID"
+//@Param data body systemReq.Register true "用户名, 密码"
 //@Success 200 {string} string "{"success":true,"data":{},"msg":"注册成功"}"
-//@Router /api/user/register [post]
+//@Router /douyin/user/register [post]
 func (d *DouSengPJHApi) DouSengRegister(c *gin.Context) {
-	var r systemReq.Register
-	_ = c.ShouldBindJSON(&r)
-	if err := utils.Verify(r, utils.RegisterVerify); err != nil {
-		response.FailWithMessage(err.Error(), c)
+	var r req.UserRegister
+	_ = c.ShouldBind(&r)
+	//参数校验
+	if err := utils.Verify(r, utils.DouSengRegisterVerify); err != nil {
+		c.JSON(http.StatusOK, res.DSResponse{
+			StatusCode: 1,
+			StatusMsg: "参数错误",
+		})
 		return
 	}
-	var authorities []system.SysAuthority
-	for _, v := range r.AuthorityIds {
-		if err, authority := authorityService.GetAuthorityBasicInfo(system.SysAuthority{
-			AuthorityId: v,
-		}); err != nil {
-			global.GSD_LOG.Error("注册失败, 角色不存在!", utils.GetRequestID(c))
-			response.FailWithMessage("注册失败, 角色不存在!", c)
-		} else {
-			authorities = append(authorities, authority)
-		}
-	}
-	curUser := utils.GetUser(c)
-	user := &system.SysUser{GSD_MODEL: global.GSD_MODEL{CreateBy: curUser.ID, UpdateBy: curUser.ID}, Username: r.Username, NickName: r.NickName, Password: r.Password, Phone: r.Phone, Email: r.Email, Authorities: authorities, DeptId: r.DeptId}
-	//数据权限校验
-	canDo := dataScope.CanDoToTargetUser(curUser, []*system.SysUser{user})
-	if !canDo {
-		global.GSD_LOG.Error("注册失败, 无权注册该用户!", utils.GetRequestID(c))
-		response.FailWithMessage("注册失败, 无权注册该用户!", c)
-		return
-	}
-	err, userReturn := userService.Register(*user)
+	//进Service
+	err:=douSengPJHService.DouSengRegisterService(r.Username,r.Password)
 	if err != nil {
-		global.GSD_LOG.Error("注册失败!", zap.Any("err", err), utils.GetRequestID(c))
-		response.FailWithDetailed(systemRes.SysUserResponse{User: userReturn}, "注册失败", c)
-	} else {
-		response.OkWithDetailed(systemRes.SysUserResponse{User: userReturn}, "注册成功", c)
+		global.GSD_LOG.Error("注册失败,用户已存在", utils.GetRequestID(c),zap.Error(err))
+		c.JSON(http.StatusOK, res.DSResponse{
+			StatusCode: 1,
+			StatusMsg: "用户已存在",
+		})
+		return
+	}
+
+	if err, user := douSengPJHService.DouSengLoginService(r.Username,r.Password); err != nil {
+		global.GSD_LOG.Error("登陆失败! 用户名不存在或者密码错误!", zap.Any("err", err), utils.GetRequestID(c))
+		c.JSON(http.StatusOK, res.DSResponse{
+			StatusCode: 1,
+			StatusMsg: "用户名不存在或者密码错误",
+		})
+	} else {//签发token
+		d.tokenNext(c, user)
 	}
 }
