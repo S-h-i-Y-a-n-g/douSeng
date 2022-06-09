@@ -22,7 +22,7 @@ type Video struct {
 	CoverUrl      string `json:"cover_url,omitempty"`					//视频封面地址
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
-	IsFavorite    bool   `json:"is_favorite,omitempty"`
+	IsFavorite    bool   `json:"is_favorite,omitempty"`					//是否点赞
 }
 
 //用户信息

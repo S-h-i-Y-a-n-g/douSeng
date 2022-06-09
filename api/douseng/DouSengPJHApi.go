@@ -2,9 +2,13 @@ package douseng
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
-	res "project/model/dousheng/response"
-	"time"
+	"project/global"
+	req "project/model/douseng/request"
+	res "project/model/douseng/response"
+	ser "project/service/douseng"
+	"project/utils"
 )
 
 type DouSengPJHApi struct{}
@@ -30,10 +34,24 @@ var DemoUser = res.User{
 	IsFollow:      false,
 }
 
+
+// @Tags DouSeng
+// @Summary 获取视频列表
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body systemReq.SetUserAuth true "latest_time, token"
+// @Success 200 {string} string "{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"
+// @Router /douyin/feed [get]
 func (d *DouSengPJHApi) Feed(c *gin.Context) {
-	c.JSON(http.StatusOK, res.GetFeedResponse{
-		DSResponse:  res.DSResponse{StatusCode: 0},
-		VideoList: DemoVideos,
-		NextTime:  time.Now().Unix(),
-	})
+	var GetInfo req.GetFeed
+	s := new(ser.DouSengPJHService)
+	//绑定参数
+	err := c.ShouldBind(&GetInfo)
+	if err != nil {
+		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
+	}
+	//进入service层处理
+	ru:=s.FeedService(GetInfo.Token,GetInfo.LatestTime)
+	c.JSON(http.StatusOK, ru)
 }
