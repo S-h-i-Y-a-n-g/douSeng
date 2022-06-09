@@ -17,10 +17,10 @@ func (u *DouSengPJHRouter) DouSengPRouter(Router *gin.RouterGroup) {
 	}
 	//设置路由组
 	douSengPJHRouter2 := Router.Group("user")
-	douSengPJHApi2 := v1.ApiGroupApp.DouSengApiGroup.DouSengPJHApi
 	{
-		douSengPJHRouter2.POST("login/",douSengPJHApi2.DouSengLogin)//登陆接口
-		douSengPJHRouter2.GET("/",douSengPJHApi2.GetUserInfo)//获取用户信息接口
+		douSengPJHRouter2.POST("login/",douSengPJHApi.DouSengLogin)//登陆接口
+		douSengPJHRouter2.GET("/",douSengPJHApi.GetUserInfo)//获取用户信息接口
+		douSengPJHRouter2.POST("register/",douSengPJHApi.DouSengRegister)//注册接口
 	}
 
 }
