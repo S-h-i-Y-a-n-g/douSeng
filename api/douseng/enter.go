@@ -8,4 +8,5 @@ type ApiGroup struct {
 
 var (
 	douSengPJHService = service.ServiceGroupApp.DouSengServiceGroup.DouSengPJHService
+	jwtService = service.ServiceGroupApp.SystemServiceGroup.JwtService
 )

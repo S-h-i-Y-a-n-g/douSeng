@@ -41,3 +41,15 @@ type Comment struct {
 	Content    string `json:"content,omitempty"`
 	CreateDate string `json:"create_date,omitempty"`
 }
+
+//用户登录返回参数
+type DouSengUserLogin struct {
+	DSResponse
+	Token string `json:"token"`
+	UserID int64 `json:"user_id"`
+}
+
+type DouSengUser struct {
+	DSResponse
+	User User `json:"user"`
+}

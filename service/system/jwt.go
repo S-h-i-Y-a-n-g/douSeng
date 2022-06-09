@@ -7,6 +7,7 @@ import (
 	"project/global"
 	"project/model/system"
 	"project/model/system/request"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -118,3 +119,39 @@ func (jwtService *JwtService) GetRedisUserInfo(uuid string) (redisUserInfo reque
 func (jwtService *JwtService) DelRedisUserInfo(uuid string) (err error) {
 	return global.GSD_REDIS.HDel(context.Background(), uuid).Err()
 }
+
+
+/***************************DouSeng***********************************/
+//@author: [PangJiaHao](https://github.com/sFFbLL)
+//@function: SetRedisDouSengUserInfo
+//@description: redis设置抖声用户信息
+//@param: jwt string, userName string
+//@return: err error
+func (jwtService *JwtService) SetRedisDouSengUserInfo(userInfo request.DouSengUserCache) (err error) {
+	//以id拼接为key吧
+	key:= strconv.Itoa(int(userInfo.ID*185)) +"PJH"
+	_, err = global.GSD_REDIS.Pipelined(context.Background(), func(rdb redis.Pipeliner) error {
+		rdb.HSet(context.Background(), key, "id", userInfo.ID)
+		rdb.HSet(context.Background(), key, "name", userInfo.UserName)
+		rdb.HSet(context.Background(), key, "follow_count", userInfo.FollowCount)
+		rdb.HSet(context.Background(), key, "follower_count", userInfo.FollowerCount)
+		return nil
+	})
+	return err
+}
+
+
+//@author: [PangJiaHao](https://github.com/sFFbLL)
+//@function: GetRedisDouSengUserInfo
+//@description: 从redis获取抖声用户信息
+//@param: uuid string
+//@return: err error
+func (jwtService *JwtService) GetRedisDouSengUserInfo(id int) (userInfoRedis request.DouSengUserCache, err error) {
+	key:= strconv.Itoa(id*185) +"PJH"
+	err = global.GSD_REDIS.HGetAll(context.Background(), key).Scan(&userInfoRedis)
+	if err != nil || userInfoRedis.ID == 0 {
+		return userInfoRedis, errors.New("查询用户缓存失败")
+	}
+	return
+}
+

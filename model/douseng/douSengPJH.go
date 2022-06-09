@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 	"project/global"
 	res "project/model/douseng/response"
+	"project/utils"
 )
 
 //表结构
@@ -19,6 +20,15 @@ type Videos struct {
 type UserFollower struct {
 	UserId int64 `json:"user_id"`
 	FollowerId int64 `json:"follower_id"`
+}
+
+type UserInfo struct {
+	Id            int64  `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	Password      string `json:"password"`
+	FollowCount   int64  `json:"follow_count,omitempty"`
+	FollowerCount int64  `json:"follower_count,omitempty"`
+	HeaderImg string 	`json:"header_img"`
 }
 
 const VideosTableName = "ds_video"
@@ -77,4 +87,14 @@ func (v *Videos)SelectIsFollow(userId int64,followId int64) (is bool , err error
 	}else {
 		return true, err
 	}
+}
+
+func (v *Videos) DouSengLogin(password,name string)(err error,info *UserInfo)  {
+	user:=new(UserInfo)
+	Password := utils.MD5V([]byte(password))
+	err=global.GSD_DB.Table(v.UserTableName()).Where("name = ? and password = ?",name,Password).Find(&user).Error
+	if user.Password != "" {
+		user.Password=password
+	}
+	return err,user
 }

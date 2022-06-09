@@ -10,12 +10,12 @@ import (
 
 type DouSengPJHService struct{}
 
+var vi ds.Videos
 
 
 //返回视频列表
 func (d *DouSengPJHService) FeedService (token string,LatestTime string) *res.GetFeedResponse {
 	resData := new(res.GetFeedResponse)
-	var vi ds.Videos
 
 	//获取视频列表
 	videoList,err:=vi.GetFeedList()
@@ -36,4 +36,10 @@ func (d *DouSengPJHService) FeedService (token string,LatestTime string) *res.Ge
 		resData.NextTime=time.Now().Unix()
 	}
 	return resData
+}
+
+func (d *DouSengPJHService) DouSengLoginService(password,name string)(error,*ds.UserInfo) {
+	//一个中转作用，有问题就往上抛
+	err,user:=vi.DouSengLogin(password,name)
+	return err,user
 }

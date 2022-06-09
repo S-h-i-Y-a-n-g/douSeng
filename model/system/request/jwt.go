@@ -32,3 +32,21 @@ type UserCacheRedis struct {
 	DeptId      uint   `redis:"deptId"`
 	AuthorityId []byte `redis:"authorityId"`
 }
+
+/***********************DouSeng***************************************/
+// DouSengJWT
+type CustomClaimsDouSeng struct {
+	ID          uint
+	Username    string
+	PassWord    string
+	BufferTime  int64 //缓存时间
+	jwt.StandardClaims
+}
+
+// DouSengUser cache structure
+type DouSengUserCache struct {
+	ID          uint                `redis:"id"`
+	UserName    string              `redis:"name"`
+	FollowCount   int64  			`redis:"follow_count"`
+	FollowerCount int64  			`redis:"follower_count"`
+}
