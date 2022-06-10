@@ -26,6 +26,11 @@ type UserFollower struct {
 	FollowerId int64 `json:"follower_id"`
 }
 
+type UserVideo struct {
+	UserId int64 `json:"user_id"`
+	VideoId int64 `json:"video_id"`
+}
+
 type UserInfo struct {
 	Id            int64  `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`
@@ -50,19 +55,21 @@ var (
 	ErrorUserExist = errors.New("用户已存在")
 	ErrorUserIsNotExist = errors.New("用户不存在")
 	ErrorUserLogin = errors.New("登陆失败，账号或密码错误")
+	ErrorUserToken = errors.New("token错误，请重新登陆")
 )
 
 
 
-func (v *Videos)GetFeedList() (videoList []res.Video,err error) {
-	var Users res.User
-	var videosList []Videos
-	var video res.Video
+func (v *Videos)GetFeedList(userID int) (videoList []res.Video,err error) {
+	var Users res.User	//视频作者的用户数据
+	var videosList []Videos //视频列表
+	var video res.Video	//视频信息
 
 	err = global.GSD_DB.Table(v.VideosTableName()).Where("deleted_at = ?",0).Limit(10).Order("id desc").Find(&videosList).Error
 	if err != nil {
 		return nil, err
 	}
+
 	//查询成功后去添加用户信息
 	for _,value :=range videosList{
 		video.Id=value.Id
@@ -77,8 +84,22 @@ func (v *Videos)GetFeedList() (videoList []res.Video,err error) {
 			global.GSD_LOG.Error("绑定视频发布者信息失败!", zap.Any("err", err))
 		}
 		//TODO 查询是否已关注,先写未关注
-		Users.IsFollow = false
-		video.IsFavorite = false
+
+		if userID == 0{ //用户未登录
+			Users.IsFollow = false
+			video.IsFavorite = false
+		}else {	//用户登录状态
+			//根据user_id去查是否已经关注
+			err, Users.IsFollow= QueryAttentionAuthor(userID,int(Users.Id))
+			if err != nil {
+				return nil, err
+			}
+			//再去找是否点赞
+			err,video.IsFavorite = SelectFavoriteByUserId(userID,int(video.Id))
+			if err != nil {
+				return nil, err
+			}
+		}
 		video.Author=Users
 		//拼接完成一个信息放入列表
 		videoList = append(videoList,video)
@@ -238,4 +259,32 @@ func GetUserInfoById(userId int) (user res.User,err error) {
 		return res.User{}, err
 	}
 	return user,err
+}
+
+//查询用户是否点赞了一个视频
+func SelectFavoriteByUserId(userId int,videoId int) (err error, bo bool) {
+	var num int64
+	err=global.GSD_DB.Table("ds_user_video_action").Where("user_id = ? AND video_id = ?",userId,videoId).Count(&num).Error
+	if err != nil {
+		return err,false
+	}
+	if num ==0{
+		return err,false
+	}else {
+		return err,true
+	}
+}
+
+//查询用户是否关注了视频作者
+func QueryAttentionAuthor(userId int,authorId int) (err error, bo bool)  {
+	var num int64
+	err=global.GSD_DB.Table("ds_user_follower").Where("user_id = ? AND follower_id = ?",authorId,userId).Count(&num).Error
+	if err != nil {
+		return err,false
+	}
+	if num ==0{
+		return err,false
+	}else {
+		return err,true
+	}
 }

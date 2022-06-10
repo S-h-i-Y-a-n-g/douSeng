@@ -38,13 +38,31 @@ type DouSengPJHApi struct{}
 // @Router /douyin/feed [get]
 func (d *DouSengPJHApi) Feed(c *gin.Context) {
 	var GetInfo req.GetFeed
+	var userID int //用户id
 	//绑定参数
 	err := c.ShouldBind(&GetInfo)
 	if err != nil {
 		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
 	}
+	//解析token
+	if GetInfo.Token != ""{
+		j := &middleware.JWT{SigningKey: []byte(global.GSD_CONFIG.JWT.SigningKey)} // 唯一签名
+		userinfo,err:=j.ParseTokenDouSeng(GetInfo.Token)
+		if err != nil {
+			global.GSD_LOG.Error("token 解析失败!", zap.Any("err", err), utils.GetRequestID(c))
+			c.JSON(http.StatusOK,res.DouSengUser{
+				DSResponse:res.DSResponse{
+					StatusMsg: "token信息错误",
+					StatusCode: 1,
+				},
+			},
+			)
+		}
+		userID = int(userinfo.ID)
+	}
+
 	//进入service层处理
-	ru:=douSengPJHService.FeedService(GetInfo.Token,GetInfo.LatestTime)
+	ru:=douSengPJHService.FeedService(userID,GetInfo.LatestTime)
 	c.JSON(http.StatusOK, ru)
 }
 
@@ -494,4 +512,17 @@ func PostToHealthCode(file *multipart.FileHeader) (string, string, error) {
 	}
 	//这里路径拼接先写死
 	return "http://rd6xoj6dg.hn-bkt.clouddn.com"+ "/" + ret.Key, ret.Key, nil
+}
+
+
+//处理一下不晓得在干嘛的接口
+func (d *DouSengPJHApi) BZD(c *gin.Context) {
+
+	c.JSON(http.StatusOK,res.DouSengUser{
+		DSResponse:res.DSResponse{
+			StatusMsg: "成功",
+			StatusCode: 0,
+		},
+	},
+	)
 }
