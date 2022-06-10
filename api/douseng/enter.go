@@ -4,9 +4,11 @@ import "project/service"
 
 type ApiGroup struct {
 	DouSengPJHApi
+	DouSengLYFApi
 }
 
 var (
 	douSengPJHService = service.ServiceGroupApp.DouSengServiceGroup.DouSengPJHService
-	jwtService = service.ServiceGroupApp.SystemServiceGroup.JwtService
+	douSengLYFService = service.ServiceGroupApp.DouSengServiceGroup.DouSengLYFService
+	jwtService        = service.ServiceGroupApp.SystemServiceGroup.JwtService
 )
