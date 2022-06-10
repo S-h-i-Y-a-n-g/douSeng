@@ -14,6 +14,7 @@ require (
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/mojocn/base64Captcha v1.3.5
 	github.com/qiniu/api.v7/v7 v7.8.2
+	github.com/qiniu/go-sdk/v7 v7.13.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/viper v1.10.1
