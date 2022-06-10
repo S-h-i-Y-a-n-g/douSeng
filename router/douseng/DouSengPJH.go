@@ -26,6 +26,10 @@ func (u *DouSengPJHRouter) DouSengPRouter(Router *gin.RouterGroup) {
 	douSengPJHRouter3 := Router.Group("publish")
 	{
 		douSengPJHRouter3.POST("action/",douSengPJHApi.DouSengPublishVideo)//上传视频接口
+		douSengPJHRouter3.GET("list/",douSengPJHApi.GetUserFeed)//用户视频列表接口
 	}
-
+	douSengPJHRouter4 := Router.Group("favorite")
+	{
+		douSengPJHRouter4.GET("list/",douSengPJHApi.GetUserFavoriteFeed)//用户点赞视频接口/douyin/favorite/list/
+	}
 }

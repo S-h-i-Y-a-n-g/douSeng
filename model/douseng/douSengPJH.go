@@ -6,6 +6,7 @@ import (
 	"project/global"
 	res "project/model/douseng/response"
 	"project/utils"
+	"time"
 )
 
 //表结构
@@ -17,6 +18,7 @@ type Videos struct {
 	Title         string `json:"title"`
 	FavoriteCount int64  `json:"favorite_count,omitempty"`				//点赞数
 	CommentCount  int64  `json:"comment_count,omitempty"`				//评论数
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UserFollower struct {
@@ -68,8 +70,9 @@ func (v *Videos)GetFeedList() (videoList []res.Video,err error) {
 		video.FavoriteCount=value.FavoriteCount
 		video.CoverUrl=value.CoverUrl
 		video.PlayUrl=value.PlayUrl
+		video.Title=value.Title
 		//查询视频发布者信息
-		err = global.GSD_DB.Table(v.UserTableName()).Where("deleted_at = ? AND id = ?",0,value.UserId).Find(&Users).Error
+		Users,err=GetUserInfoById(int(value.UserId))
 		if err != nil {
 			global.GSD_LOG.Error("绑定视频发布者信息失败!", zap.Any("err", err))
 		}
@@ -149,4 +152,90 @@ func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err erro
 	v.CoverUrl = "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg" //封面先固定
 	err = global.GSD_DB.Table("ds_video").Create(&v).Error
 	return err
+}
+
+
+//发布列表
+func (v *Videos)GetUserFeedList(userId int) (videoList []res.Video,err error) {
+	var Users res.User
+	var videosList []Videos
+	var video res.Video
+
+	err = global.GSD_DB.Table(v.VideosTableName()).Where("deleted_at = ? AND user_id = ?",0,userId).Limit(10).Order("id desc").Find(&videosList).Error
+	if err != nil {
+		return nil, err
+	}
+	//查询成功后去添加用户信息
+	for _,value :=range videosList{
+		video.Id=value.Id
+		video.CommentCount=value.CommentCount
+		video.FavoriteCount=value.FavoriteCount
+		video.CoverUrl=value.CoverUrl
+		video.PlayUrl=value.PlayUrl
+		video.Title=value.Title
+
+		//查询视频发布者信息
+		Users,err=GetUserInfoById(int(value.UserId))
+		if err != nil {
+			global.GSD_LOG.Error("绑定视频发布者信息失败!", zap.Any("err", err))
+		}
+		//TODO 查询是否已关注,先写未关注
+		Users.IsFollow = false
+		video.IsFavorite = false
+		video.Author=Users
+		//拼接完成一个信息放入列表
+		videoList = append(videoList,video)
+	}
+	return videoList, err
+}
+
+//点赞列表
+func (v *Videos)GetUserFavoriteFeedList(userId int) (videoList []res.Video,err error) {
+	var Users res.User
+	var videosList []Videos
+	var video res.Video
+	var videoID []int
+
+	//先去点赞关系表里查所有用户点赞的视频id
+	err=global.GSD_DB.Table("ds_user_video_action").Select("video_id").Where("user_id = ?",userId).Find(&videoID).Error
+	if err != nil {
+		return nil, err
+	}
+	err = global.GSD_DB.Table(v.VideosTableName()).Where("deleted_at = ? AND id in ?",0,videoID).Limit(10).Order("id desc").Find(&videosList).Error
+	if err != nil {
+		return nil, err
+	}
+
+
+	//查询成功后去添加用户信息
+	for _,value :=range videosList{
+		video.Id=value.Id
+		video.CommentCount=value.CommentCount
+		video.FavoriteCount=value.FavoriteCount
+		video.CoverUrl=value.CoverUrl
+		video.PlayUrl=value.PlayUrl
+		video.Title=value.Title
+
+		//查询视频发布者信息
+		Users,err=GetUserInfoById(int(value.UserId))
+		if err != nil {
+			global.GSD_LOG.Error("绑定视频发布者信息失败!", zap.Any("err", err))
+		}
+		//TODO 查询是否已关注,先写未关注
+		Users.IsFollow = false
+		//点赞的视频列表都是true
+		video.IsFavorite = true
+		video.Author=Users
+		//拼接完成一个信息放入列表
+		videoList = append(videoList,video)
+	}
+	return videoList, err
+}
+
+func GetUserInfoById(userId int) (user res.User,err error) {
+	err=global.GSD_DB.Table("ds_user").Where("id = ? AND deleted_at = ?",userId,0).Find(&user).Error
+	if err != nil {
+		return res.User{}, err
+	}
+	return user,err
 }

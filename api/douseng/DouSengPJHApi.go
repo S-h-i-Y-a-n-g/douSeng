@@ -27,28 +27,6 @@ import (
 type DouSengPJHApi struct{}
 
 
-var DemoVideos = []res.Video{
-	{
-		Id:            1,
-		Author:        DemoUser,
-		PlayUrl:       "https://www.w3schools.com/html/movie.mp4",
-		CoverUrl:      "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg",
-		FavoriteCount: 0,
-		CommentCount:  0,
-		IsFavorite:    false,
-	},
-}
-
-var DemoUser = res.User{
-	Id:            1,
-	Name:          "TestUser",
-	FollowCount:   0,
-	FollowerCount: 0,
-	IsFollow:      false,
-}
-
-
-
 // @Tags DouSeng
 // @Summary 获取视频列表
 // @Description Author：PangJiaHao 2022/06/09
@@ -56,7 +34,7 @@ var DemoUser = res.User{
 // @accept application/json
 // @Produce application/json
 // @Param data body systemReq.SetUserAuth true "latest_time, token"
-// @Success 200 {string} string "{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"
+// @Success 200 {string} string "{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"UserFeedService
 // @Router /douyin/feed [get]
 func (d *DouSengPJHApi) Feed(c *gin.Context) {
 	var GetInfo req.GetFeed
@@ -67,6 +45,111 @@ func (d *DouSengPJHApi) Feed(c *gin.Context) {
 	}
 	//进入service层处理
 	ru:=douSengPJHService.FeedService(GetInfo.Token,GetInfo.LatestTime)
+	c.JSON(http.StatusOK, ru)
+}
+
+// @Tags DouSeng
+// @Summary 获取用户视频列表
+// @Description Author：PangJiaHao 2022年6月9日21:40:31
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body systemReq.SetUserAuth true "latest_time, token"
+// @Success 200 {string} string "{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"UserFeedService
+// @Router /douyin/feed [get]
+func (d *DouSengPJHApi) GetUserFeed(c *gin.Context) {
+	var GetInfo req.GetUserInfoBo
+	//绑定参数
+	err := c.ShouldBind(&GetInfo)
+	if err != nil {
+		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "参数错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//token验证
+	//解析token
+	j := &middleware.JWT{SigningKey: []byte(global.GSD_CONFIG.JWT.SigningKey)} // 唯一签名
+	userinfo,err:=j.ParseTokenDouSeng(GetInfo.Token)
+	if err != nil {
+		global.GSD_LOG.Error("token 解析失败!", zap.Any("err", err), utils.GetRequestID(c))
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "token信息错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//验证信息同步
+	if int64(userinfo.ID)!=GetInfo.UserId{
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "token信息错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//信息无误，进入service层处理
+	ru:=douSengPJHService.UserFeedService(int(GetInfo.UserId))
+	c.JSON(http.StatusOK, ru)
+}
+
+
+// @Tags DouSeng
+// @Summary 获取用户点赞视频列表
+// @Description Author：PangJiaHao 2022年6月9日21:40:31
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body systemReq.SetUserAuth true "user_id, token"
+// @Success 200 {string} string "{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"UserFeedService
+// @Router /douyin/feed [get]
+func (d *DouSengPJHApi) GetUserFavoriteFeed(c *gin.Context) {
+	var GetInfo req.GetUserInfoBo
+	//绑定参数
+	err := c.ShouldBind(&GetInfo)
+	if err != nil {
+		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "参数错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//token验证
+	//解析token
+	j := &middleware.JWT{SigningKey: []byte(global.GSD_CONFIG.JWT.SigningKey)} // 唯一签名
+	userinfo,err:=j.ParseTokenDouSeng(GetInfo.Token)
+	if err != nil {
+		global.GSD_LOG.Error("token 解析失败!", zap.Any("err", err), utils.GetRequestID(c))
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "token信息错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//验证信息同步
+	if int64(userinfo.ID)!=GetInfo.UserId{
+		c.JSON(http.StatusOK,res.DouSengUser{
+			DSResponse:res.DSResponse{
+				StatusMsg: "token信息错误",
+				StatusCode: 1,
+			},
+		},
+		)
+	}
+	//信息无误，进入service层处理
+	ru:=douSengPJHService.UserFavoriteFeedService(int(GetInfo.UserId))
 	c.JSON(http.StatusOK, ru)
 }
 
@@ -343,34 +426,7 @@ func (d *DouSengPJHApi) DouSengPublishVideo (c *gin.Context) {
 		)
 		return
 	}
-
-
-	//上传视频到七牛云在service，返回路径和名字
-	filePath, _, uploadErr :=PostToHealthCode(file)
-	if uploadErr != nil {
-		c.JSON(http.StatusOK,res.DouSengUser{
-			DSResponse:res.DSResponse{
-				StatusMsg: "上传视频失败",
-				StatusCode: 1,
-			},
-		},
-		)
-		return
-	}
-
-
-	//将路径存入数据库
-	err=douSengPJHService.DouSengUploadService(filePath,f.Title,int(userinfo.ID))
-	if err != nil {
-		c.JSON(http.StatusOK,res.DouSengUser{
-			DSResponse:res.DSResponse{
-				StatusMsg: "视频信息存储失败",
-				StatusCode: 1,
-			},
-		},
-		)
-		return
-	}
+	go Test(file,f,userinfo.ID)
 
 	c.JSON(http.StatusOK,res.DouSengUser{
 		DSResponse:res.DSResponse{
@@ -380,6 +436,17 @@ func (d *DouSengPJHApi) DouSengPublishVideo (c *gin.Context) {
 	},
 	)
 
+	return
+
+
+}
+
+func Test(file *multipart.FileHeader,f req.UploadedFile,id uint ){
+	//上传视频到七牛云在service，返回路径和名字
+	filePath, _, _ :=PostToHealthCode(file)
+
+	//将路径存入数据库
+	_=douSengPJHService.DouSengUploadService(filePath,f.Title,int(id))
 
 }
 

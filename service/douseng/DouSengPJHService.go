@@ -16,7 +16,6 @@ var vi ds.Videos
 //返回视频列表
 func (d *DouSengPJHService) FeedService (token string,LatestTime string) *res.GetFeedResponse {
 	resData := new(res.GetFeedResponse)
-
 	//获取视频列表
 	videoList,err:=vi.GetFeedList()
 	if err != nil {
@@ -37,6 +36,44 @@ func (d *DouSengPJHService) FeedService (token string,LatestTime string) *res.Ge
 	}
 	return resData
 }
+
+//返回用户发布视频列表
+func (d *DouSengPJHService) UserFeedService (userId int) *res.GetUserFeedResponse {
+	resData := new(res.GetUserFeedResponse)
+	//获取视频列表
+	videoList,err:=vi.GetUserFeedList(userId)
+	if err != nil {
+		global.GSD_LOG.Error("获取视频列表失败!", zap.Any("err", err))
+		return &res.GetUserFeedResponse{
+			DSResponse:  res.DSResponse{StatusCode: 200,StatusMsg: "未知错误"},
+		}
+	}
+	resData.VideoList=videoList
+	resData.StatusCode=0
+	resData.StatusMsg="success"
+
+	return resData
+}
+
+//返回用户点赞视频列表
+func (d *DouSengPJHService) UserFavoriteFeedService (userId int) *res.GetUserFeedResponseTest {
+	resData := new(res.GetUserFeedResponseTest)
+	//获取视频列表
+	videoList,err:=vi.GetUserFavoriteFeedList(userId)
+	if err != nil {
+		global.GSD_LOG.Error("获取视频列表失败!", zap.Any("err", err))
+		return &res.GetUserFeedResponseTest{
+			DSResponse:  res.DSResponse{StatusCode: 200,StatusMsg: "未知错误"},
+		}
+	}
+	resData.VideoList=videoList
+	resData.StatusCode=0
+	resData.StatusMsg="success"
+	resData.VideoCount=1
+
+	return resData
+}
+
 
 func (d *DouSengPJHService) DouSengLoginService(password,name string)(error,*ds.UserInfo) {
 	//一个中转作用，有问题就往上抛

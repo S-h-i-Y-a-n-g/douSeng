@@ -14,6 +14,17 @@ type GetFeedResponse struct {
 	NextTime  int64   `json:"next_time,omitempty"`
 }
 
+type GetUserFeedResponse struct {
+	DSResponse
+	VideoList []Video `json:"video_list"`
+}
+
+type GetUserFeedResponseTest struct {
+	DSResponse
+	VideoList []Video `json:"video_list"`
+	VideoCount  int `json:"video_count"`
+}
+
 //视频
 type Video struct {
 	Id  int64  `json:"id,omitempty"`
@@ -23,6 +34,7 @@ type Video struct {
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`					//是否点赞
+	Title         string `json:"title"`	//标题
 }
 
 //用户信息

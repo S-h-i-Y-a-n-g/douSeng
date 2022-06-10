@@ -13,7 +13,7 @@ type DouSengLogin struct{
 	Password      string `form:"password"`	//密码
 }
 
-//得到用户信息入参
+//得到用户信息入参 也是用户发布列表入参
 type GetUserInfoBo struct {
 	UserId int64 `json:"user_id" form:"user_id"`
 	Token string `json:"token" form:"token"`
