@@ -50,3 +50,10 @@ func (d *DouSengPJHService) DouSengRegisterService(name,password string)error{
 	err:=vi.DouSengRegister(password,name)
 	return err
 }
+
+//上传视频service
+func (d *DouSengPJHService) DouSengUploadService(PlayUrl,Title string , userId int)error{
+	//一个中转作用，有问题就往上抛
+	err:=vi.DouSengUploadVideo(PlayUrl,Title,userId)
+	return err
+}

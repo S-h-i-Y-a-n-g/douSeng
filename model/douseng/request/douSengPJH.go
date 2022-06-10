@@ -24,3 +24,9 @@ type UserRegister struct {
 	Username      string `form:"username"` //用户名
 	Password      string `form:"password"`	//密码
 }
+
+//用户上传视频入参
+type UploadedFile struct {
+	Title   string `form:"title" json:"title"`
+	Token 	string `form:"token" json:"token"`
+}

@@ -14,6 +14,7 @@ type Videos struct {
 	UserId        int64 `json:"user_id"`		//用户id
 	PlayUrl       string `json:"play_url" json:"play_url,omitempty"`	//视频播放地址
 	CoverUrl      string `json:"cover_url,omitempty"`					//视频封面地址
+	Title         string `json:"title"`
 	FavoriteCount int64  `json:"favorite_count,omitempty"`				//点赞数
 	CommentCount  int64  `json:"comment_count,omitempty"`				//评论数
 }
@@ -45,6 +46,7 @@ func (v *Videos) UserTableName() string {
 
 var (
 	ErrorUserExist = errors.New("用户已存在")
+	ErrorUserIsNotExist = errors.New("用户不存在")
 	ErrorUserLogin = errors.New("登陆失败，账号或密码错误")
 )
 
@@ -125,3 +127,26 @@ func (v *Videos) DouSengRegister(password,name string)(err error)  {
 	return err
 }
 
+
+//上传视频
+func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err error)  {
+	user:=new(UserInfo)
+	video:=new(Videos)
+	err=global.GSD_DB.Table(v.UserTableName()).Where("id = ? AND deleted_at = ?",userId,0).Find(&user).Error
+	if user.Password == "" {
+		//账号不存在
+		return ErrorUserIsNotExist
+	}
+	//TODO 查询视频是否已经存在 不知道有没有必要，先放着
+	err=global.GSD_DB.Table(v.VideosTableName()).Where("play_url = ? AND deleted_at = ?",PlayUrl,0).Find(&video).Error
+	if err != nil {
+
+	}
+
+	v.UserId=int64(userId)
+	v.PlayUrl = PlayUrl
+	v.Title = Title
+	v.CoverUrl = "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg" //封面先固定
+	err = global.GSD_DB.Table("ds_video").Create(&v).Error
+	return err
+}
