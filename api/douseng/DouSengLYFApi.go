@@ -11,7 +11,6 @@ import (
 )
 
 type RelationActionRequest struct {
-	UserId     int64  `json:"user_id,omitempty" form:"user_id"`
 	Token      string `json:"token,omitempty" form:"token"`
 	ToUserId   int64  `json:"to_user_id,omitempty" form:"to_user_id"`
 	ActionType int32  `json:"action_type,omitempty" form:"action_type"`
@@ -49,12 +48,13 @@ func (d *DouSengLYFApi) Action(c *gin.Context) {
 	if err != nil {
 		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
 	}
-	if id, err := tokenValidate(parameter.Token); err != nil || id != parameter.UserId {
+	id, err := tokenValidate(parameter.Token)
+	if err != nil || id == parameter.ToUserId {
 		var msg string
 		if err != nil {
 			msg = err.Error()
 		} else {
-			msg = "token错误"
+			msg = "不能关注自己捏~"
 		}
 		c.JSON(http.StatusOK, RelationActionResponse{RelationBaseResponse{
 			StatusCode: 1,
@@ -63,7 +63,7 @@ func (d *DouSengLYFApi) Action(c *gin.Context) {
 		return
 	}
 	//进入service层处理
-	res := douSengLYFService.RelationAction(parameter.UserId, parameter.ToUserId, parameter.ActionType, parameter.Token)
+	res := douSengLYFService.RelationAction(id, parameter.ToUserId, parameter.ActionType, parameter.Token)
 	c.JSON(http.StatusOK, RelationActionResponse{RelationBaseResponse: RelationBaseResponse{
 		StatusCode: func() int32 {
 			if res == nil {

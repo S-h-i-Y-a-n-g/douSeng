@@ -26,7 +26,6 @@ import (
 
 type DouSengPJHApi struct{}
 
-
 // @Tags DouSeng
 // @Summary 获取视频列表
 // @Description Author：PangJiaHao 2022/06/09
@@ -465,6 +464,8 @@ func Test(file *multipart.FileHeader,f req.UploadedFile,id uint ){
 
 	//将路径存入数据库
 	_=douSengPJHService.DouSengUploadService(filePath,f.Title,int(id))
+
+	// TODO 取视频第一帧作为封面 file文件
 
 }
 

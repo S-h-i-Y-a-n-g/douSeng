@@ -13,8 +13,12 @@ func (u *DouSengLYFRouter) RelationRouter(Router *gin.RouterGroup) {
 	//具体路由
 	douSengLYFApi := v1.ApiGroupApp.DouSengApiGroup.DouSengLYFApi
 	{
-		douSengLYFRouter.GET("follow/list", douSengLYFApi.FollowList)     //关注列表
-		douSengLYFRouter.GET("follower/list", douSengLYFApi.FollowerList) //粉丝列表
-		douSengLYFRouter.POST("action", douSengLYFApi.Action)             //关注操作
+		douSengLYFRouter.POST("action/", douSengLYFApi.Action)             //关注操作
+	}
+
+	douSengLYFRouter2 := Router.Group("")
+	{
+		douSengLYFRouter2.GET("follow/list/", douSengLYFApi.FollowList)     //关注列表
+		douSengLYFRouter2.GET("follower/list/", douSengLYFApi.FollowerList) //粉丝列表
 	}
 }

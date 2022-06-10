@@ -55,11 +55,10 @@ var (
 	ErrorUserExist = errors.New("用户已存在")
 	ErrorUserIsNotExist = errors.New("用户不存在")
 	ErrorUserLogin = errors.New("登陆失败，账号或密码错误")
-	ErrorUserToken = errors.New("token错误，请重新登陆")
 )
 
 
-
+//获取视频列表
 func (v *Videos)GetFeedList(userID int) (videoList []res.Video,err error) {
 	var Users res.User	//视频作者的用户数据
 	var videosList []Videos //视频列表
@@ -107,7 +106,6 @@ func (v *Videos)GetFeedList(userID int) (videoList []res.Video,err error) {
 	return videoList, err
 }
 
-
 //查询follow是否是user的粉丝
 func (v *Videos)SelectIsFollow(userId int64,followId int64) (is bool , err error) {
 	test:=new(UserFollower)
@@ -151,7 +149,6 @@ func (v *Videos) DouSengRegister(password,name string)(err error)  {
 	return err
 }
 
-
 //上传视频
 func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err error)  {
 	user:=new(UserInfo)
@@ -174,7 +171,6 @@ func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err erro
 	err = global.GSD_DB.Table("ds_video").Create(&v).Error
 	return err
 }
-
 
 //发布列表
 func (v *Videos)GetUserFeedList(userId int) (videoList []res.Video,err error) {
@@ -253,6 +249,7 @@ func (v *Videos)GetUserFavoriteFeedList(userId int) (videoList []res.Video,err e
 	return videoList, err
 }
 
+//得到用户信息
 func GetUserInfoById(userId int) (user res.User,err error) {
 	err=global.GSD_DB.Table("ds_user").Where("id = ? AND deleted_at = ?",userId,0).Find(&user).Error
 	if err != nil {
