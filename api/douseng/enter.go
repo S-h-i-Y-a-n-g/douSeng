@@ -5,6 +5,7 @@ import "project/service"
 type ApiGroup struct {
 	DouSengPJHApi
 	DouSengLYFApi
+	DouSengXYFApi
 }
 
 var (

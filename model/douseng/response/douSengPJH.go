@@ -1,11 +1,10 @@
 package request
 
-
 //响应参数
 
 type DSResponse struct {
-	StatusCode int `json:"status_code"`
-	StatusMsg string `json:"status_msg"`
+	StatusCode int    `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
 }
 
 type GetFeedResponse struct {
@@ -27,10 +26,10 @@ type GetUserFeedResponseTest struct {
 
 //视频
 type Video struct {
-	Id  int64  `json:"id,omitempty"`
+	Id            int64  `json:"id,omitempty"`
 	Author        User   `json:"author"`
-	PlayUrl       string `json:"play_url" json:"play_url,omitempty"`	//视频播放地址
-	CoverUrl      string `json:"cover_url,omitempty"`					//视频封面地址
+	PlayUrl       string `json:"play_url" json:"play_url,omitempty"` //视频播放地址
+	CoverUrl      string `json:"cover_url,omitempty"`                //视频封面地址
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`					//是否点赞
@@ -57,8 +56,8 @@ type Comment struct {
 //用户登录返回参数
 type DouSengUserLogin struct {
 	DSResponse
-	Token string `json:"token"`
-	UserID int64 `json:"user_id"`
+	Token  string `json:"token"`
+	UserID int64  `json:"user_id"`
 }
 
 type DouSengUser struct {

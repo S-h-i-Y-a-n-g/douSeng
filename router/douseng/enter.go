@@ -4,4 +4,6 @@ package douseng
 type RouterGroup struct {
 	DouSengPJHRouter
 	DouSengLYFRouter
+	DouSengXYFRouter
+
 }

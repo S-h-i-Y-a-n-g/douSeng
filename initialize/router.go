@@ -55,6 +55,7 @@ func Routers() *gin.Engine {
 	{
 		douSengRouter.DouSengPRouter(PublicGroup1) //测试接口
 		douSengRouter.RelationRouter(PublicGroup1)
+		douSengRouter.DouSengXRouter(PublicGroup1)
 	}
 
 	global.GSD_LOG.Info("router register success")

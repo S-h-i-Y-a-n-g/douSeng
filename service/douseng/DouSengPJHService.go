@@ -3,9 +3,9 @@ package douseng
 import (
 	"go.uber.org/zap"
 	"project/global"
-	res "project/model/douseng/response"
 	ds "project/model/douseng"
 	"strconv"
+	res "project/model/douseng/response"
 	"time"
 )
 
@@ -13,8 +13,8 @@ type DouSengPJHService struct{}
 
 var vi ds.Videos
 
-
 //返回视频列表
+
 func (d *DouSengPJHService) FeedService (userID int,LatestTime string) *res.GetFeedResponse {
 	resData := new(res.GetFeedResponse)
 		//游客，未登录逻辑
@@ -79,22 +79,23 @@ func (d *DouSengPJHService) UserFavoriteFeedService (userId int) *res.GetUserFee
 }
 
 
+
 func (d *DouSengPJHService) DouSengLoginService(password,name string)(error,*ds.UserInfo) {
 	//一个中转作用，有问题就往上抛
-	err,user:=vi.DouSengLogin(password,name)
-	return err,user
+	err, user := vi.DouSengLogin(password, name)
+	return err, user
 }
 
 //注册service
-func (d *DouSengPJHService) DouSengRegisterService(name,password string)error{
+func (d *DouSengPJHService) DouSengRegisterService(name, password string) error {
 	//一个中转作用，有问题就往上抛
-	err:=vi.DouSengRegister(password,name)
+	err := vi.DouSengRegister(password, name)
 	return err
 }
 
 //上传视频service
-func (d *DouSengPJHService) DouSengUploadService(PlayUrl,Title string , userId int)error{
+func (d *DouSengPJHService) DouSengUploadService(PlayUrl, Title string, userId int) error {
 	//一个中转作用，有问题就往上抛
-	err:=vi.DouSengUploadVideo(PlayUrl,Title,userId)
+	err := vi.DouSengUploadVideo(PlayUrl, Title, userId)
 	return err
 }

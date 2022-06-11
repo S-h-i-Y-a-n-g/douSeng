@@ -82,8 +82,6 @@ func (v *Videos)GetFeedList(userID int) (videoList []res.Video,err error) {
 		if err != nil {
 			global.GSD_LOG.Error("绑定视频发布者信息失败!", zap.Any("err", err))
 		}
-		//TODO 查询是否已关注,先写未关注
-
 		if userID == 0{ //用户未登录
 			Users.IsFollow = false
 			video.IsFavorite = false
@@ -167,7 +165,7 @@ func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err erro
 	v.UserId=int64(userId)
 	v.PlayUrl = PlayUrl
 	v.Title = Title
-	v.CoverUrl = "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg" //封面先固定
+	v.CoverUrl = PlayUrl+"?vframe/jpg/offset/0" //封面取第一帧
 	err = global.GSD_DB.Table("ds_video").Create(&v).Error
 	return err
 }
@@ -214,7 +212,7 @@ func (v *Videos)GetUserFavoriteFeedList(userId int) (videoList []res.Video,err e
 	var videoID []int
 
 	//先去点赞关系表里查所有用户点赞的视频id
-	err=global.GSD_DB.Table("ds_user_video_action").Select("video_id").Where("user_id = ?",userId).Find(&videoID).Error
+	err=global.GSD_DB.Table("ds_user_video_action").Select("video_id").Where("user_id = ? AND deleted_at = 0",userId).Find(&videoID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +259,7 @@ func GetUserInfoById(userId int) (user res.User,err error) {
 //查询用户是否点赞了一个视频
 func SelectFavoriteByUserId(userId int,videoId int) (err error, bo bool) {
 	var num int64
-	err=global.GSD_DB.Table("ds_user_video_action").Where("user_id = ? AND video_id = ?",userId,videoId).Count(&num).Error
+	err=global.GSD_DB.Table("ds_user_video_action").Where("user_id = ? AND video_id = ? AND deleted_at = 0",userId,videoId).Count(&num).Error
 	if err != nil {
 		return err,false
 	}
