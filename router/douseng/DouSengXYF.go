@@ -7,7 +7,7 @@ import (
 
 type DouSengXYFRouter struct{}
 
-func (u *DouSengXYFRouter) DouSengXYFRouter(Router *gin.RouterGroup) {
+func (u *DouSengXYFRouter) DouSengXRouter(Router *gin.RouterGroup) {
 	//设置路由组
 	douSengXYFRouter := Router.Group("")
 
