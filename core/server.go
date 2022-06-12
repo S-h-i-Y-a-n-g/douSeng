@@ -13,6 +13,16 @@ type server interface {
 	ListenAndServe() error
 }
 
+var LogoContent = `
+ _____   _____   _   _   _____   _   _   _____   __   _   _____  
+|  _  \ /  _  \ | | | | /  ___/ | | | | | ____| |  \ | | /  ___| 
+| | | | | | | | | | | | | |___  | |_| | | |__   |   \| | | |     
+| | | | | | | | | | | | \___  \ |  _  | |  __|  | |\   | | |  _  
+| |_| | | |_| | | |_| |  ___| | | | | | | |___  | | \  | | |_| | 
+|_____/ \_____/ \_____/ /_____/ |_| |_| |_____| |_|  \_| \_____/    
+`
+
+
 func RunWindowsServer() {
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
@@ -24,9 +34,10 @@ func RunWindowsServer() {
 	time.Sleep(10 * time.Microsecond)
 	global.GSD_LOG.Info("server run success on ", zap.String("address", address))
 
+	fmt.Printf("%s\n", LogoContent)
 	fmt.Printf(`
-	欢迎使用 Go-Sword
-	当前版本:V1.0
+	欢迎使用 抖声
+	当前版本:V1.16
 	默认自动化文档地址:http://127.0.0.1%s/swagger/index.html
 `, address)
 	global.GSD_LOG.Error(s.ListenAndServe().Error())
