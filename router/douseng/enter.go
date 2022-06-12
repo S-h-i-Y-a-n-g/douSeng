@@ -5,5 +5,5 @@ type RouterGroup struct {
 	DouSengPJHRouter
 	DouSengLYFRouter
 	DouSengXYFRouter
-
+	DouShengWYHRouter
 }

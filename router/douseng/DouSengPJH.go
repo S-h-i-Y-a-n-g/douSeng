@@ -32,9 +32,15 @@ func (u *DouSengPJHRouter) DouSengPRouter(Router *gin.RouterGroup) {
 	{
 		douSengPJHRouter4.GET("list/",douSengPJHApi.GetUserFavoriteFeed)//用户点赞视频接口/douyin/favorite/list/
 	}
-	douSengPJHRouter5 := Router.Group("")
+}
+
+func (u *DouSengPJHRouter) DouSengPRouter2(Router *gin.RouterGroup) {
+	//设置路由组
+	douSengPJHRouter := Router.Group("")
+	douSengPJHApi := v1.ApiGroupApp.DouSengApiGroup.DouSengPJHApi
 	{
-		douSengPJHRouter5.GET("favicon.ico",douSengPJHApi.BZD)//不知道干嘛的接口
-		douSengPJHRouter5.GET("/",douSengPJHApi.BZD)//不知道干嘛的接口
+		douSengPJHRouter.GET("favicon.ico",douSengPJHApi.BZD)//不知道干嘛的接口
+		douSengPJHRouter.GET("/",douSengPJHApi.BZD)//不知道干嘛的接口
 	}
+
 }

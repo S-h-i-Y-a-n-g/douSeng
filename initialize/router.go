@@ -53,9 +53,16 @@ func Routers() *gin.Engine {
 	//公共路由组，加一个抖音前缀
 	PublicGroup1 := Router.Group("douyin")
 	{
-		douSengRouter.DouSengPRouter(PublicGroup1) //测试接口
+		douSengRouter.DouSengPRouter(PublicGroup1) //p接口
 		douSengRouter.RelationRouter(PublicGroup1)
 		douSengRouter.DouSengXRouter(PublicGroup1)
+		douSengRouter.DouShengWRouter(PublicGroup1) //评论接口
+	}
+
+	//两个未知接口简单返回一下
+	PublicGroup2 := Router.Group("")
+	{
+		douSengRouter.DouSengPRouter2(PublicGroup2)
 	}
 
 	global.GSD_LOG.Info("router register success")

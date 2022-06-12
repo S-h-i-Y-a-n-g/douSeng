@@ -4,5 +4,5 @@ type ServiceGroup struct {
 	DouSengPJHService
 	DouSengLYFService
 	DouSengXYFService
-
+	DouShengWYHService
 }
