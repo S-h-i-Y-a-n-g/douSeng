@@ -442,7 +442,7 @@ func PostToHealthCode(file *multipart.FileHeader) (string, string, error) {
 
 	//通过 *multipart.FileHeader 打开获取
 	files, openError := file.Open()
-	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename) // 文件名格式 自己可以改 建议保证唯一性
+	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), "DouSheng") // 文件名格式 自己可以改 建议保证唯一性
 	defer files.Close()                                              // 创建文件 defer 关闭
 	if openError != nil {
 		global.GSD_LOG.Error("function file.Open() Filed", zap.Any("err", openError.Error()))

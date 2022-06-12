@@ -71,7 +71,4 @@ func (d *DouSengXYFApi) Action(c *gin.Context) {
 	}
 
 
-	//点赞完成后去维护一下视频列表
-
-
 }

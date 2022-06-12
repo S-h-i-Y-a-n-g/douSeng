@@ -6,8 +6,7 @@ import (
 )
 
 const UserFavoriteTableName = "ds_user_video_action"
-const user_rowname = "user_id"
-const video_rowname = "video_id"
+
 
 //表结构
 type Favorite struct{
@@ -46,17 +45,17 @@ func (r *Favorite) DZAction(videoID int, userID int,Action int ) (err error) {
 //维护video表
 func WeiHuVideo(videoID int,Action int)  {
 	v:=new(Videos)
-	err := global.GSD_DB.Table("ds_video").Where("video_id = ? ",videoID).Find(&v).Error
+	err := global.GSD_DB.Table("ds_video").Where("id = ? ",videoID).Find(&v).Error
 	if err != nil {
 		return
 	}
-	if Action == 1 {
-		_ = global.GSD_DB.Table("ds_video").Where("video_id = ?",videoID).Updates(&Favorite{
-			DeletedAt: int(v.FavoriteCount+1),
+	if Action == 1 {	//点赞
+		_ = global.GSD_DB.Table("ds_video").Where("id = ?",videoID).Updates(&Videos{
+			FavoriteCount: v.FavoriteCount+1,
 		}).Error
-	}else {
-		_ = global.GSD_DB.Table("ds_video").Where("video_id = ?",videoID).Updates(&Favorite{
-			DeletedAt: int(v.FavoriteCount-1),
+	}else {				//取消点赞
+		_ = global.GSD_DB.Table("ds_video").Where("id = ?",videoID).Updates(&Videos{
+			FavoriteCount: v.FavoriteCount-1,
 		}).Error
 	}
 

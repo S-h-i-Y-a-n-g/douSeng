@@ -16,7 +16,7 @@ func (u *DouSengLYFRouter) RelationRouter(Router *gin.RouterGroup) {
 		douSengLYFRouter.POST("action/", douSengLYFApi.Action)             //关注操作
 	}
 
-	douSengLYFRouter2 := Router.Group("")
+	douSengLYFRouter2 := Router.Group("relation")
 	{
 		douSengLYFRouter2.GET("follow/list/", douSengLYFApi.FollowList)     //关注列表
 		douSengLYFRouter2.GET("follower/list/", douSengLYFApi.FollowerList) //粉丝列表

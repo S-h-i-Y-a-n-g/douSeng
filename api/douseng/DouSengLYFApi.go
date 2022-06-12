@@ -72,8 +72,12 @@ func (d *DouSengLYFApi) Action(c *gin.Context) {
 			return 1
 		}(),
 		StatusMsg: func() string {
-			if res == nil {
-				return ""
+			if res == nil  {
+				if  parameter.ActionType==1 {
+					return "关注成功"
+				}else{
+					return "取关了亲"
+				}
 			}
 			return res.Error()
 		}(),

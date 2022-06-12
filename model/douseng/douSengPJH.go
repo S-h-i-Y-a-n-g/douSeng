@@ -151,6 +151,7 @@ func (v *Videos) DouSengRegister(password,name string)(err error)  {
 func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err error)  {
 	user:=new(UserInfo)
 	video:=new(Videos)
+	videos:=new(Videos)
 	err=global.GSD_DB.Table(v.UserTableName()).Where("id = ? AND deleted_at = ?",userId,0).Find(&user).Error
 	if user.Password == "" {
 		//账号不存在
@@ -161,12 +162,11 @@ func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err erro
 	if err != nil {
 
 	}
-
-	v.UserId=int64(userId)
-	v.PlayUrl = PlayUrl
-	v.Title = Title
-	v.CoverUrl = PlayUrl+"?vframe/jpg/offset/0" //封面取第一帧
-	err = global.GSD_DB.Table("ds_video").Create(&v).Error
+	videos.UserId=int64(userId)
+	videos.PlayUrl = PlayUrl
+	videos.Title = Title
+	videos.CoverUrl = PlayUrl+"?vframe/jpg/offset/0" //封面取第一帧
+	err = global.GSD_DB.Table("ds_video").Create(&videos).Error
 	return err
 }
 
