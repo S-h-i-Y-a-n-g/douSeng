@@ -27,6 +27,8 @@ func (d *DouShengWYHApi) CommentList(c *gin.Context) {
 	}
 }
 
+
+//评论操作
 func (d *DouShengWYHApi) CommentAction(c *gin.Context) {
 	var action douseng.CommentAction
 	err := c.ShouldBind(&action)

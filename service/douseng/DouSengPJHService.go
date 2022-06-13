@@ -94,8 +94,8 @@ func (d *DouSengPJHService) DouSengRegisterService(name, password string) error 
 }
 
 //上传视频service
-func (d *DouSengPJHService) DouSengUploadService(PlayUrl, Title string, userId int) error {
+func (d *DouSengPJHService) DouSengUploadService(PlayUrl, Title ,filetp string, userId int) error {
 	//一个中转作用，有问题就往上抛
-	err := vi.DouSengUploadVideo(PlayUrl, Title, userId)
+	err := vi.DouSengUploadVideo(PlayUrl, Title,filetp, userId)
 	return err
 }

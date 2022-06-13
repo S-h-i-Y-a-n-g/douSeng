@@ -27,6 +27,8 @@ import (
 type DouSengPJHApi struct{}
 
 
+
+
 // @Tags DouSeng
 // @Summary 获取视频列表
 // @Description Author：PangJiaHao 2022/06/09
@@ -331,7 +333,7 @@ func (d *DouSengPJHApi) DouSengRegister(c *gin.Context) {
 		return
 	}
 
-	if err, user := douSengPJHService.DouSengLoginService(r.Username, r.Password); err != nil {
+	if err, user := douSengPJHService.DouSengLoginService(r.Password,r.Username ); err != nil {
 		global.GSD_LOG.Error("登陆失败! 用户名不存在或者密码错误!", zap.Any("err", err), utils.GetRequestID(c))
 		c.JSON(http.StatusOK, res.DSResponse{
 			StatusCode: 1,
@@ -352,6 +354,8 @@ func (d *DouSengPJHApi) DouSengRegister(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"注册成功"}"
 // @Router /douyin/publish/action/ [post]
 func (d *DouSengPJHApi) DouSengPublishVideo(c *gin.Context) {
+	bT := time.Now().Second()            // 开始时间
+	var successInfo int
 	var f req.UploadedFile
 	_ = c.ShouldBind(&f)
 	_, file, err := c.Request.FormFile("data")
@@ -378,47 +382,51 @@ func (d *DouSengPJHApi) DouSengPublishVideo(c *gin.Context) {
 		return
 	}
 
-	go Test(file,f,userinfo.ID)
+	go Test(file,f,userinfo.ID,&successInfo)
 
-	c.JSON(http.StatusOK,res.DouSengUser{
-		DSResponse:res.DSResponse{
-			StatusMsg: "上传成功",
-			StatusCode: 0,
-		},
-	},
-	)
-	return
+
+	for {
+		if successInfo != 0 || time.Now().Second()-bT>5||bT-time.Now().Second()>5 {
+			fmt.Printf("函数内  ： %v",successInfo)
+			c.JSON(http.StatusOK,res.DouSengUser{
+				DSResponse:res.DSResponse{
+					StatusMsg: "上传成功",
+					StatusCode: 0,
+				},
+			},
+			)
+			successInfo=0
+			return
+		}
+	}
 
 }
 
-func Test(file *multipart.FileHeader,f req.UploadedFile,id uint ){
+
+
+func Test(file *multipart.FileHeader,f req.UploadedFile,id uint,successInfo *int){
+
 	//上传视频到七牛云在service，返回路径和名字
-	filePath, _, _ :=PostToHealthCode(file)
+	filePath, _, _ :=PostToHealthCode2(file)
+	filetp, _, _ :=PostToHealthCode(file)
+	//上传到本地
+	//n:=up.NewOss()
+	//filePath, _, _ :=n.UploadFile(file)
 
 	//将路径存入数据库
-	_=douSengPJHService.DouSengUploadService(filePath,f.Title,int(id))
-
+	_=douSengPJHService.DouSengUploadService(filePath,f.Title,filetp,int(id))
+	*successInfo = 1
+	//这里准备开一个协程去检查上传成功的是否是图片，如果是
 }
 
 //上传视频到七牛云
 func PostToHealthCode(file *multipart.FileHeader) (string, string, error) {
-
 	var accessKey,secretKey,bucket,Furl string
-
-	if time.Now().Second()%2==0{
-		//这里的配置单独做，目前先链接我的
-		accessKey = "udGS-HeZnr2aZQC0XJMprzWXnMy2D6AX44OVVklG"
-		secretKey = "RvFxcW7T66MN4A5qCyPXl6zl_d8vv34eUALMb0lg"
-		bucket = "dousheng1"
-		Furl ="http://rd6xoj6dg.hn-bkt.clouddn.com"
-	}else {
 		//这里的配置单独做，目前先链接我的
 		accessKey = "FhMyDZi245KmVAntt_MoIl2hqxBAHMik1JooI7Zz"
 		secretKey = "SqQ202of1sL-g3iw0d-Jc4kpzxP8wkcBTNaKQ3i5"
 		bucket = "bctbsdousheng"
 		Furl ="http://rd9jtq8qx.hn-bkt.clouddn.com"
-	}
-
 
 	putPolicy := storage.PutPolicy{
 		Scope: bucket,
@@ -442,7 +450,7 @@ func PostToHealthCode(file *multipart.FileHeader) (string, string, error) {
 
 	//通过 *multipart.FileHeader 打开获取
 	files, openError := file.Open()
-	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), "DouSheng") // 文件名格式 自己可以改 建议保证唯一性
+	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename) // 文件名格式 自己可以改 建议保证唯一性
 	defer files.Close()                                              // 创建文件 defer 关闭
 	if openError != nil {
 		global.GSD_LOG.Error("function file.Open() Filed", zap.Any("err", openError.Error()))
@@ -469,3 +477,90 @@ func (d *DouSengPJHApi) BZD(c *gin.Context) {
 	},
 	)
 }
+
+
+//
+func PostToHealthCode2(file *multipart.FileHeader) (string, string, error) {
+
+	//这里的配置单独做，目前先链接我的
+	accessKey := "udGS-HeZnr2aZQC0XJMprzWXnMy2D6AX44OVVklG"
+	secretKey := "RvFxcW7T66MN4A5qCyPXl6zl_d8vv34eUALMb0lg"
+	bucket := "dousheng1"
+
+	putPolicy := storage.PutPolicy{
+		Scope: bucket,
+	}
+	mac := qbox.NewMac(accessKey, secretKey)
+	upToken := putPolicy.UploadToken(mac)
+
+	cfg := storage.Config{}
+	cfg.Zone = &storage.ZoneHuanan
+	cfg.UseHTTPS = false
+	cfg.UseCdnDomains = false
+
+	formUploader := storage.NewFormUploader(&cfg)
+
+
+	ret := storage.PutRet{}
+
+	putExtra := storage.PutExtra{
+	}
+
+	//通过 *multipart.FileHeader 打开获取
+	files, openError := file.Open()
+	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename) // 文件名格式 自己可以改 建议保证唯一性
+	defer files.Close()                                                  // 创建文件 defer 关闭
+	if openError != nil {
+		global.GSD_LOG.Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+	}
+	//put上传到七牛云
+	putErr := formUploader.Put(context.Background(), &ret, upToken, fileKey, files, file.Size, &putExtra)
+
+	if putErr != nil {
+		global.GSD_LOG.Error("function formUploader.Put() Filed", zap.Any("err", putErr.Error()))
+		return "", "", errors.New("function formUploader.Put() Filed, err:" + putErr.Error())
+	}
+
+	//这里路径拼接先写死
+	return "http://rd6xoj6dg.hn-bkt.clouddn.com"+ "/" + ret.Key, ret.Key, nil
+}
+
+func test(){
+
+	accessKey := "udGS-HeZnr2aZQC0XJMprzWXnMy2D6AX44OVVklG"
+	secretKey := "RvFxcW7T66MN4A5qCyPXl6zl_d8vv34eUALMb0lg"
+	bucket := "dousheng1"
+
+	mac := qbox.NewMac(accessKey, secretKey)
+
+	cfg := storage.Config{}
+	cfg.Zone = &storage.ZoneHuanan
+	cfg.UseHTTPS = false
+	cfg.UseCdnDomains = false
+
+	s:=storage.NewBucketManager(mac,&cfg)
+
+	f,err:=s.Stat(bucket,"1655015084luxu.mp4")
+
+	if err != nil {
+		fmt.Println("查询失败")
+	}
+	fmt.Println(f.MimeType)
+}
+
+//func (d *DouSengPJHApi)  Play(c *gin.Context)  {
+//	var realPath ="D:\\0.ME\\项目\\抖音大作业\\frist\\marchsoft-golangkuangjia-GoSword-develop\\uploads\\file\\"
+//	requestUrl :=c.Request.URL.String()
+//
+//	filePath := requestUrl[len("/uploads/file/"):]
+//	fmt.Println("requestUrl =",realPath+filePath)
+//	file,err :=os.Open(realPath + filePath)
+//	defer file.Close()
+//	if err != nil {
+//
+//	} else {
+//		bs,_ := ioutil.ReadAll(file)
+//		c.Data(200,"video/mp4",bs)
+//	}
+//
+//}

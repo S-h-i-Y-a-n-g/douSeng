@@ -382,7 +382,7 @@ func (b *BaseApi) UpdatePassword(c *gin.Context) {
 // @Summary 重置用户密码
 // @Security ApiKeyAuth
 // @Produce  application/json
-// @Param data body reqId request.GetById true "用户id"
+// @Param data body request.GetById true "用户id"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"修改成功"}"
 // @Router /api/user/changePassword [put]
 func (b *BaseApi) ResetPassword(c *gin.Context) {

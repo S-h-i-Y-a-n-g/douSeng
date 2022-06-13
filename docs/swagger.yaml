@@ -400,6 +400,18 @@ definitions:
       id:
         type: integer
     type: object
+  request.SetUserDept:
+    properties:
+      ID:
+        description: 用户id
+        type: integer
+      deptId:
+        description: 部门id
+        type: integer
+      uuid:
+        description: uuid
+        type: string
+    type: object
   request.SetUserInfo:
     properties:
       ID:
@@ -416,7 +428,7 @@ definitions:
       email:
         description: 邮箱
         type: string
-      headImg:
+      headerImg:
         description: 头像
         type: string
       nickName:
@@ -1779,12 +1791,12 @@ paths:
   /api/user/changePassword:
     put:
       parameters:
-      - description: 用户名, 原密码, 新密码
+      - description: 用户id
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.ChangePasswordStruct'
+          $ref: '#/definitions/request.GetById'
       produces:
       - application/json
       responses:
@@ -1794,7 +1806,7 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: 用户修改密码
+      summary: 重置用户密码
       tags:
       - SysUser
   /api/user/deleteUser:
@@ -2060,6 +2072,29 @@ paths:
       summary: 更改用户权限
       tags:
       - SysUser
+  /api/user/setUserDept:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID, UUID, 部门id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserDept'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"设置成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 设置用户部门
+      tags:
+      - SysUser
   /api/user/setUserInfo:
     put:
       consumes:
@@ -2083,6 +2118,150 @@ paths:
       summary: 设置用户信息
       tags:
       - SysUser
+  /douyin/feed:
+    get:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022年6月9日21:40:31
+      parameters:
+      - description: latest_time, token
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserAuth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"UserFeedService'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户视频列表
+      tags:
+      - DouSeng
+  /douyin/publish/action/:
+    post:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022/06/09
+      parameters:
+      - description: 视频数据, token ,title
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Register'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"注册成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DouSeng用户上传视频
+      tags:
+      - DouSeng
+  /douyin/publish/list/:
+    get:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022年6月9日21:40:31
+      parameters:
+      - description: user_id, token
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserAuth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"StatusCode":0,"VideoList":{},"NextTime":"当前时间"}"UserFeedService'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户点赞视频列表
+      tags:
+      - DouSeng
+  /douyin/user/:
+    get:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022/06/09
+      parameters:
+      - description: user_id, token
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserAuth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"StatusCode":0,"user_id":,"token":}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DouSeng得到用户的所有信息
+      tags:
+      - DouSeng
+  /douyin/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022/06/09
+      parameters:
+      - description: user_id, token
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserAuth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"StatusCode":0,"user_id":,"token":}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DouSeng用户登录
+      tags:
+      - DouSeng
+  /douyin/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Author：PangJiaHao 2022/06/09
+      parameters:
+      - description: 用户名, 密码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Register'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"注册成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: DouSeng用户注册账号
+      tags:
+      - DouSeng
 securityDefinitions:
   ApiKeyAuth:
     in: header

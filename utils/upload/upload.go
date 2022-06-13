@@ -24,10 +24,10 @@ type OSS interface {
 
 func NewOss() OSS {
 	switch global.GSD_CONFIG.System.OssType {
-	case "local":
-		return &Local{}
-	case "qiniu":
-		return &Qiniu{}
+	//case "local":
+	//	return &Local{}
+	//case "qiniu":
+	//	return &Qiniu{}
 	default:
 		return &Local{}
 	}

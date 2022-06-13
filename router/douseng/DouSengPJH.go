@@ -39,8 +39,12 @@ func (u *DouSengPJHRouter) DouSengPRouter2(Router *gin.RouterGroup) {
 	douSengPJHRouter := Router.Group("")
 	douSengPJHApi := v1.ApiGroupApp.DouSengApiGroup.DouSengPJHApi
 	{
-		douSengPJHRouter.GET("favicon.ico",douSengPJHApi.BZD)//不知道干嘛的接口
+		douSengPJHRouter.GET("favicon.ico",douSengPJHApi.BZD)//不知道干嘛的接口,貌似是在找图标
 		douSengPJHRouter.GET("/",douSengPJHApi.BZD)//不知道干嘛的接口
+		//douSengPJHRouter.GET("/uploads/file/*.mp4",douSengPJHApi.Play)//不知道干嘛的接口
 	}
 
 }
+
+
+

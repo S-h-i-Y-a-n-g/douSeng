@@ -142,13 +142,12 @@ func (v *Videos) DouSengRegister(password,name string)(err error)  {
 	//没有账号的话去注册
 	user.Name=name
 	user.Password=Password
-
 	err = global.GSD_DB.Table(v.UserTableName()).Create(&user).Error
 	return err
 }
 
 //上传视频
-func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err error)  {
+func (v *Videos) DouSengUploadVideo (PlayUrl,Title,filetp string , userId int)(err error)  {
 	user:=new(UserInfo)
 	video:=new(Videos)
 	videos:=new(Videos)
@@ -165,7 +164,7 @@ func (v *Videos) DouSengUploadVideo (PlayUrl,Title string , userId int)(err erro
 	videos.UserId=int64(userId)
 	videos.PlayUrl = PlayUrl
 	videos.Title = Title
-	videos.CoverUrl = PlayUrl+"?vframe/jpg/offset/0" //封面取第一帧
+	videos.CoverUrl = filetp+"?vframe/jpg/offset/0" //封面取第一帧
 	err = global.GSD_DB.Table("ds_video").Create(&videos).Error
 	return err
 }
