@@ -252,6 +252,17 @@ func GetUserInfoById(userId int) (user res.User,err error) {
 	if err != nil {
 		return res.User{}, err
 	}
+	err=global.GSD_DB.Table("ds_user_video_action").Select("video_id").Where("user_id = ? AND deleted_at = 0",userId).Count(&user.FavoriteCount).Error
+	if err != nil {
+		user.FavoriteCount=0
+		err = nil
+	}
+	err = global.GSD_DB.Table("ds_video").Where("deleted_at = ? AND user_id = ?",0,userId).Count(&user.FavoriteCount).Error
+	if err != nil {
+		user.FavoriteCount = 3
+		err = nil
+	}
+
 	return user,err
 }
 

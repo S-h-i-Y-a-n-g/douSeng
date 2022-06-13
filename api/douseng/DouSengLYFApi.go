@@ -90,7 +90,7 @@ func (d *DouSengLYFApi) FollowList(c *gin.Context) {
 	if err != nil {
 		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
 	}
-	if id, err := tokenValidate(parameter.Token); err != nil || id != parameter.UserId {
+	if id, err := tokenValidate(parameter.Token); err != nil || id == 0 {
 		var msg string
 		if err != nil {
 			msg = err.Error()
@@ -127,7 +127,7 @@ func (d *DouSengLYFApi) FollowerList(c *gin.Context) {
 	if err != nil {
 		global.GSD_LOG.Error("绑定参数失败!", zap.Any("err", err), utils.GetRequestID(c))
 	}
-	if id, err := tokenValidate(parameter.Token); err != nil || id != parameter.UserId {
+	if id, err := tokenValidate(parameter.Token); err != nil || id == 0{
 		var msg string
 		if err != nil {
 			msg = err.Error()
